@@ -714,13 +714,21 @@ public class SlideMenuController: UIViewController, UIGestureRecognizerDelegate 
     private func panLeftResultInfoForVelocity(velocity: CGPoint) -> PanInfo {
         
         let thresholdVelocity: CGFloat = 1000.0
-        let pointOfNoReturn: CGFloat = CGFloat(floor(leftMinOrigin())) + SlideMenuOptions.pointOfNoReturnWidth
         let leftOrigin: CGFloat = leftContainerView.frame.origin.x
-        
+
+        let leftPointOfNoReturn = leftMinOrigin() + SlideMenuOptions.pointOfNoReturnWidth
+        let rightPointOfNoReturn = -SlideMenuOptions.pointOfNoReturnWidth
+
         var panInfo: PanInfo = PanInfo(action: .Close, shouldBounce: false, velocity: 0.0)
-        
-        panInfo.action = leftOrigin <= pointOfNoReturn ? .Close : .Open;
-        
+
+        if leftOrigin <= leftPointOfNoReturn {
+            panInfo.action = .Close
+        } else if leftOrigin < rightPointOfNoReturn {
+            panInfo.action = velocity.x > 0 ? .Open : .Close
+        } else if leftOrigin >= rightPointOfNoReturn {
+            panInfo.action = .Open
+        }
+
         if velocity.x >= thresholdVelocity {
             panInfo.action = .Open
             panInfo.velocity = velocity.x
@@ -735,13 +743,21 @@ public class SlideMenuController: UIViewController, UIGestureRecognizerDelegate 
     private func panRightResultInfoForVelocity(velocity: CGPoint) -> PanInfo {
         
         let thresholdVelocity: CGFloat = -1000.0
-        let pointOfNoReturn: CGFloat = CGFloat(floor(CGRectGetWidth(view.bounds)) - SlideMenuOptions.pointOfNoReturnWidth)
         let rightOrigin: CGFloat = rightContainerView.frame.origin.x
-        
+
+        let leftPointOfNoReturn = view.bounds.width - (SlideMenuOptions.rightViewWidth - SlideMenuOptions.pointOfNoReturnWidth)
+        let rightPointOfNoReturn = view.bounds.width - SlideMenuOptions.pointOfNoReturnWidth
+
         var panInfo: PanInfo = PanInfo(action: .Close, shouldBounce: false, velocity: 0.0)
-        
-        panInfo.action = rightOrigin >= pointOfNoReturn ? .Close : .Open
-        
+
+        if rightOrigin <= leftPointOfNoReturn {
+            panInfo.action = .Open
+        } else if rightOrigin < rightPointOfNoReturn {
+            panInfo.action = velocity.x > 0 ? .Close : .Open
+        } else if rightOrigin >= rightPointOfNoReturn {
+            panInfo.action = .Close
+        }
+
         if velocity.x <= thresholdVelocity {
             panInfo.action = .Open
             panInfo.velocity = velocity.x
